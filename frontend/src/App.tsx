@@ -6,7 +6,10 @@ function App() {
 
   return (
     <div>
-      frontend
+      <h1>Game</h1>
+      <div className="game">
+        
+      </div>
     </div>
   )
 }
