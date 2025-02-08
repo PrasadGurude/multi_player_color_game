@@ -17,6 +17,7 @@ function broadcastToRoom(roomId, username) {
         type: "join",
         payload:{
             message: `${username} joined the room`,
+            color:username.color,
             username
         }
     };
@@ -44,7 +45,7 @@ wss.on('connection', (ws) => {
 
             if (!rooms[roomId]) {
                 rooms[roomId] = {};
-                colors = ['R', 'G', 'B'];
+                colors = ['red', 'green', 'blue'];
                 rooms[roomId].colors = colors;
             }
 
@@ -71,6 +72,7 @@ wss.on('connection', (ws) => {
 
             let username = parseData.payload.clientId;
             let roomId = parseData.payload.roomId;
+            
 
             if (!rooms[roomId]) {
                 ws.send("Room not found");
@@ -91,12 +93,13 @@ wss.on('connection', (ws) => {
                             color: rooms[roomId][username].color,
                         },
                     }));
-
                 }
             });
 
             ws.on('close', () => {
                 console.log('Client disconnected');
+                rooms[roomId].colors.push(username.color);
+                delete rooms[roomId][username];
             });
         }
     });
