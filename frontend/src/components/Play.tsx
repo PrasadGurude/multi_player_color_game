@@ -1,20 +1,76 @@
 import React, { useEffect, useState } from 'react'
+import { toast } from 'react-hot-toast';
 
 type PlayProps = {
-    ws: WebSocket | null;
-    message: string;
-    userColor: string;
-    roomId:string
-    username:string
+    ws: WebSocket | undefined,
+    formData: {
+        roomId: string,
+        username: string
+    },
+    userColor: string,
+    setWs: React.Dispatch<React.SetStateAction<WebSocket | undefined>>,
+    setUserColor: React.Dispatch<React.SetStateAction<string>>
+
 }
 
 export const Play: React.FC<PlayProps> = (props) => {
 
     type Color = 'red' | 'blue' | 'green';
 
-    const [userColor, setUserColor] = useState(props.userColor)
+    useEffect(() => {
+        // if (!props.formData.username || !props.formData.roomId || props.ws) return;
+        const newWs = new WebSocket('ws://localhost:8080');
+        props.setWs(newWs);
 
-    const [color, setColor] = useState<Record<string, Color>>({
+        newWs.onopen = () => {
+            console.log('WebSocket connection established');
+            newWs.send(JSON.stringify({
+                type: "join",
+                payload: {
+                    username: props.formData.username,
+                    roomId: props.formData.roomId
+                }
+            }))
+        };
+
+        newWs.onmessage = (event) => {
+            const data = JSON.parse(event.data);
+            if (data.type === 'join') {
+                console.log("user joined the room")
+                toast.success(`${data.payload.username} joined the game`)
+                props.setUserColor(`${data.payload.color}`)
+
+            } else if (data.type === "move") {
+                setColors(prevColors => ({
+                    ...prevColors,
+                    [`box${data.payload.box}`]: data.payload.color as Color
+                }));
+            }
+            console.log('Message from server:', data);
+        };
+
+        newWs.onclose = () => {
+            console.log('WebSocket connection closed. Attempting to reconnect...');
+            toast.error("Connection error. Reconnecting...");
+        
+            setTimeout(() => {
+                props.setWs(undefined);  // Allow `useEffect` to create a new connection
+            }, 3000);  // Retry after 3 seconds
+        };
+
+        newWs.onerror = (error) => {
+            console.error('WebSocket error:', error);
+        };
+
+        return () => {
+            console.log("Closing WebSocket...");
+            newWs.close();
+        };
+
+    }, [props.formData])
+
+
+    const [colors, setColors] = useState<Record<string, Color>>({
         box1: 'green',
         box2: 'red',
         box3: 'red',
@@ -57,19 +113,24 @@ export const Play: React.FC<PlayProps> = (props) => {
                         key={index}
                         onClick={() => {
                             if (props.ws) {
+                                setColors(prevColors => ({
+                                    ...prevColors,
+                                    [`box${1 + index}`]: props.userColor as Color // ✅ Update UI instantly
+                                }));
+                        
                                 props.ws.send(
                                     JSON.stringify({
                                         type: 'move',
                                         payload: {
                                             box: 1 + index,
-                                            roomId:props.roomId,
-                                            username:props.username
+                                            roomId: props.formData.roomId,
+                                            username: props.formData.username
                                         }
                                     })
                                 );
                             }
                         }}
-                        className={`w-20 h-16 flex justify-center items-center text-black font-bold ${colorClasses[color[`box${1 + index}`]]
+                        className={`w-20 h-16 flex justify-center items-center text-black font-bold ${colorClasses[colors[`box${1 + index}`]]
                             }`}
                     >
                         {index + 1}
