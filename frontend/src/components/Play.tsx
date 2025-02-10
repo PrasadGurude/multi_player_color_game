@@ -15,39 +15,40 @@ type PlayProps = {
 
 export const Play: React.FC<PlayProps> = (props) => {
 
-    type Color = 'red' | 'blue' | 'green';
+    type Color = 'red' | 'blue' | 'green' | 'white';
     
     const [colors, setColors] = useState<Record<string, Color>>({
-        box1: 'green',
-        box2: 'red',
-        box3: 'red',
-        box4: 'red',
-        box5: 'red',
-        box6: 'red',
-        box7: 'red',
-        box8: 'red',
-        box9: 'red',
-        box10: 'red',
-        box11: 'red',
-        box12: 'red',
-        box13: 'red',
-        box14: 'red',
-        box15: 'red',
-        box16: 'red',
-        box17: 'red',
-        box18: 'red',
-        box19: 'red',
-        box20: 'red',
-        box21: 'red',
-        box22: 'red',
-        box23: 'red',
-        box24: 'red',
+        box1: 'white',
+        box2: 'white',
+        box3: 'white',
+        box4: 'white',
+        box5: 'white',
+        box6: 'white',
+        box7: 'white',
+        box8: 'white',
+        box9: 'white',
+        box10: 'white',
+        box11: 'white',
+        box12: 'white',
+        box13: 'white',
+        box14: 'white',
+        box15: 'white',
+        box16: 'white',
+        box17: 'white',
+        box18: 'white',
+        box19: 'white',
+        box20: 'white',
+        box21: 'white',
+        box22: 'white',
+        box23: 'white',
+        box24: 'white',
     })
 
-    const colorClasses: Record<'red' | 'blue' | 'green', string> = {
+    const colorClasses: Record<'red' | 'blue' | 'green' | 'white', string> = {
         red: 'bg-red-300',
         blue: 'bg-blue-300',
         green: 'bg-green-300',
+        white: "bg-white"
     };
 
     useEffect(() => {
