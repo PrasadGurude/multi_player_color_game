@@ -23,7 +23,7 @@ function App() {
         <Routes>
           <Route path="/" element={<Navigate to="/home" />} />
           <Route path="/home" element={<Home formData={formData} setFormData={setFormData} ws={ws} setWs={setWs} userColor={userColor} />} ></Route>
-          <Route path="/play/:roomId" element={<Play ws={ws} formData={formData} userColor={userColor} setWs={setWs} setUserColor={setUserColor}/>} ></Route>
+          <Route path="/play/:roomId/:username" element={<Play ws={ws} formData={formData} userColor={userColor} setWs={setWs} setUserColor={setUserColor}/>} ></Route>
         </Routes>
       </BrowserRouter>
     </div>

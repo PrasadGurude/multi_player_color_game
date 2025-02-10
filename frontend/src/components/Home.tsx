@@ -44,7 +44,7 @@ export const Home: React.FC<HomeProps> = (props) => {
             return;
         }
 
-        navigate(`/play/${props.formData.roomId}`)
+        navigate(`/play/${props.formData.roomId}/${props.formData.username}`)
 
 
     }

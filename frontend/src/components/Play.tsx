@@ -45,9 +45,9 @@ export const Play: React.FC<PlayProps> = (props) => {
     })
 
     const colorClasses: Record<'red' | 'blue' | 'green' | 'white', string> = {
-        red: 'bg-red-300',
-        blue: 'bg-blue-300',
-        green: 'bg-green-300',
+        red: 'bg-red-600',
+        blue: 'bg-blue-600',
+        green: 'bg-green-600',
         white: "bg-white"
     };
 
@@ -121,6 +121,7 @@ export const Play: React.FC<PlayProps> = (props) => {
     return (
         <div className='bg-slate-900 h-screen flex flex-col justify-center items-center'>
             <h1 className='font-bold text-white text-4xl mb-5'>Game</h1>
+            <div className={`text-2xl font-semibold mb-4 p-1 rounded-2xl  ${colorClasses[props.userColor as Color]}`}>{`username is ${props.formData.username} with color ${props.userColor}`}</div>
             <div className="grid grid-cols-6 grid-rows-4 gap-4">
                 {[...Array(24)].map((_, index) => (
                     <div
