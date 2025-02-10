@@ -16,60 +16,7 @@ type PlayProps = {
 export const Play: React.FC<PlayProps> = (props) => {
 
     type Color = 'red' | 'blue' | 'green';
-
-    useEffect(() => {
-        // if (!props.formData.username || !props.formData.roomId || props.ws) return;
-        const newWs = new WebSocket('ws://localhost:8080');
-        props.setWs(newWs);
-
-        newWs.onopen = () => {
-            console.log('WebSocket connection established');
-            newWs.send(JSON.stringify({
-                type: "join",
-                payload: {
-                    username: props.formData.username,
-                    roomId: props.formData.roomId
-                }
-            }))
-        };
-
-        newWs.onmessage = (event) => {
-            const data = JSON.parse(event.data);
-            if (data.type === 'join') {
-                console.log("user joined the room")
-                toast.success(`${data.payload.username} joined the game`)
-                props.setUserColor(`${data.payload.color}`)
-
-            } else if (data.type === "move") {
-                setColors(prevColors => ({
-                    ...prevColors,
-                    [`box${data.payload.box}`]: data.payload.color as Color
-                }));
-            }
-            console.log('Message from server:', data);
-        };
-
-        newWs.onclose = () => {
-            console.log('WebSocket connection closed. Attempting to reconnect...');
-            toast.error("Connection error. Reconnecting...");
-        
-            setTimeout(() => {
-                props.setWs(undefined);  // Allow `useEffect` to create a new connection
-            }, 3000);  // Retry after 3 seconds
-        };
-
-        newWs.onerror = (error) => {
-            console.error('WebSocket error:', error);
-        };
-
-        return () => {
-            console.log("Closing WebSocket...");
-            newWs.close();
-        };
-
-    }, [props.formData])
-
-
+    
     const [colors, setColors] = useState<Record<string, Color>>({
         box1: 'green',
         box2: 'red',
@@ -103,6 +50,72 @@ export const Play: React.FC<PlayProps> = (props) => {
         green: 'bg-green-300',
     };
 
+    useEffect(() => {
+        if (!props.formData.username || !props.formData.roomId || props.ws) return;
+        const newWs = new WebSocket('ws://localhost:8080');
+        props.setWs(newWs);
+
+        newWs.onopen = () => {
+            setTimeout(() => {
+                newWs.send(
+                    JSON.stringify({
+                        type: 'join',
+                        payload: {
+                            username: props.formData.username,
+                            roomId: props.formData.roomId,
+                        },
+                    })
+                );
+            }, 500); // Small delay to ensure WebSocket is fully open
+        };
+
+        newWs.onmessage = (event) => {
+            const data = JSON.parse(event.data);
+            if (data.type === 'join') {
+                console.log('User joined:', data.payload.username);
+                toast.success(`${data.payload.username} joined the game`);                toast.success(`${data.payload.username} joined the game`)
+                props.setUserColor(`${data.payload.color}`)
+
+            } else if (data.type === "move") {
+                setColors(prevColors => ({
+                    ...prevColors,
+                    [`box${data.payload.box}`]: data.payload.color as Color
+                }));
+            }
+            console.log('Message from server:', data);
+        };
+
+        newWs.onclose = () => {
+            console.log('WebSocket connection closed. Attempting to reconnect...');
+            toast.error("Connection error.");
+        
+        };
+
+        newWs.onerror = (error) => {
+            console.error('WebSocket error:', error);
+        };
+
+        return () => {
+            console.log("Closing WebSocket...");
+            newWs.close();
+        };
+
+    }, [props.formData])
+
+    const handleBoxClick = (index: number) => {
+        if (props.ws) {
+            props.ws.send(
+                JSON.stringify({
+                    type: 'move',
+                    payload: {
+                        box: index + 1,
+                        roomId: props.formData.roomId,
+                        username: props.formData.username,
+                    },
+                })
+            );
+        }
+    };
 
     return (
         <div className='bg-slate-900 h-screen flex flex-col justify-center items-center'>
@@ -111,26 +124,8 @@ export const Play: React.FC<PlayProps> = (props) => {
                 {[...Array(24)].map((_, index) => (
                     <div
                         key={index}
-                        onClick={() => {
-                            if (props.ws) {
-                                setColors(prevColors => ({
-                                    ...prevColors,
-                                    [`box${1 + index}`]: props.userColor as Color // ✅ Update UI instantly
-                                }));
-                        
-                                props.ws.send(
-                                    JSON.stringify({
-                                        type: 'move',
-                                        payload: {
-                                            box: 1 + index,
-                                            roomId: props.formData.roomId,
-                                            username: props.formData.username
-                                        }
-                                    })
-                                );
-                            }
-                        }}
-                        className={`w-20 h-16 flex justify-center items-center text-black font-bold ${colorClasses[colors[`box${1 + index}`]]
+                        onClick={() => {handleBoxClick(index)}}
+                        className={`w-20 h-16 flex justify-center items-center text-black font-bold ${colorClasses[colors[`box${1 + index}`] as Color]
                             }`}
                     >
                         {index + 1}

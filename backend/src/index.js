@@ -49,7 +49,7 @@ wss.on('connection', (ws) => {
                 console.log("room created")
             }
 
-            if (Object.keys(rooms[roomId]).length >= 4) {
+            if (Object.keys(rooms[roomId].users).length >= 3) {
                 ws.send("More than 3 users are not allowed in this room.");
                 return;
             }
@@ -59,13 +59,14 @@ wss.on('connection', (ws) => {
                 return;
             }
 
-            let color = rooms[roomId].colors.shift()
+            let color = rooms[roomId].colors.shift() || 'red';
 
             rooms[roomId].users[username] = {
                 ws: ws,
                 color // Assign color from the list
             };
             console.log("rooms.roomId.username:{ws,color} is set");
+            console.log(rooms)
             broadcastToRoom(roomId, username, color);
         }
 
@@ -73,12 +74,14 @@ wss.on('connection', (ws) => {
             console.log("Inside move");
 
             if (!rooms[roomId]) {
-                ws.send("Room not found");
+                console.log("inside room does not exhist")
+                ws.send(JSON.stringify({ type: "error", message: "User already exists in the room." }))
                 return;
             }
 
             if (!rooms[roomId].users[username]) {
-                ws.send("User not found in the room");
+                console.log("user does not exhist");
+                ws.send(JSON.stringify({ type: "error", message: "User already exists in the room." }))
                 return;
             }
 
@@ -105,7 +108,7 @@ wss.on('connection', (ws) => {
                 }
 
                 // If the room is empty, delete it
-                if (Object.keys(rooms[roomId]).length === 1) {
+                if (Object.keys(rooms[roomId].users).length === 0) {
                     delete rooms[roomId];
                 }
             });
