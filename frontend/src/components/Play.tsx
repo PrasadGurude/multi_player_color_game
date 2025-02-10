@@ -75,7 +75,9 @@ export const Play: React.FC<PlayProps> = (props) => {
             if (data.type === 'join') {
                 console.log('User joined:', data.payload.username);
                 toast.success(`${data.payload.username} joined the game`);                toast.success(`${data.payload.username} joined the game`)
-                props.setUserColor(`${data.payload.color}`)
+                if(props.formData.username === data.payload.username){
+                    props.setUserColor(`${data.payload.color}`)
+                }
 
             } else if (data.type === "move") {
                 setColors(prevColors => ({

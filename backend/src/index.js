@@ -10,7 +10,7 @@ const wss = new WebSocketServer({ server });
 let rooms = {};
 let colors = [];
 
-function broadcastToRoom(roomId, username, color) {
+function broadcastToRoom(roomId, username, color, ws) {
     if (!rooms[roomId]) return; // If the room does not exist, do nothing
     let message = {
         type: "join",
@@ -24,10 +24,14 @@ function broadcastToRoom(roomId, username, color) {
 
     Object.values(rooms[roomId].users).forEach((client) => {
         if (client.ws.readyState === WebSocket.OPEN) {
-            client.ws.send(JSON.stringify(message)); // Correctly stringify the message
+            if (client.ws === ws) {
+                client.ws.send(JSON.stringify(message)); 
+            }
         }else {
             console.log(`Skipping message, WebSocket for ${username} is closed.`);
         }
+        console.log("out of broadcastToRoom");
+        
     });
 }
 
@@ -67,7 +71,7 @@ wss.on('connection', (ws) => {
             };
             console.log("rooms.roomId.username:{ws,color} is set");
             console.log(rooms)
-            broadcastToRoom(roomId, username, color);
+            broadcastToRoom(roomId, username, color , ws);
         }
 
         if (parseData.type === "move") {
@@ -86,7 +90,7 @@ wss.on('connection', (ws) => {
             }
 
             Object.values(rooms[roomId].users).forEach((client) => {
-                if (client.ws.readyState === WebSocket.OPEN) {
+                if (client.ws.readyState === WebSocket.OPEN ) {
                     client.ws.send(JSON.stringify({
                         type: "move",
                         payload: {
